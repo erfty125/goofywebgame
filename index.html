@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h1>fuking game</h1>
+
+<canvas id="myCanvas" width="1600" height="1600" style="border:1px solid #000000; background-color: #808B96;">
+</canvas>
+
+<script>
+var x=10;
+var y=10;
+var angle=0;
+var img = new Image();    
+img.src = 'fard.png';
+var c = document.getElementById("myCanvas");
+var ctx = c.getContext("2d");
+
+
+var dPressed = false;
+var aPressed = false;
+var wPressed = false;
+var sPressed = false;
+var qPressed = false;
+
+document.addEventListener("keydown", keyDownHandler);
+document.addEventListener("keyup", keyUpHandler);
+
+
+setInterval(game, 16);
+
+function keyDownHandler(e) {
+  if (e.key === "d") {
+    dPressed = true;
+  } else if (e.key === "a") {
+    aPressed = true;
+  } else if (e.key === "w") {
+    wPressed = true;
+  } else if (e.key === "s") {
+    sPressed = true;
+  } else if (e.key === "v") {
+    qPressed = true;
+  }
+
+}
+
+// Handle key release
+function keyUpHandler(e) {
+  if (e.key === "d") {
+    dPressed = false;
+  } else if (e.key === "a") {
+    aPressed = false;
+  } else if (e.key === "w") {
+    wPressed = false;
+  } else if (e.key === "s") {
+    sPressed = false;
+  } else if (e.key === "v") {
+    qPressed = false;
+  }
+}
+
+var mouseDown = false;
+document.body.onmousedown = function(e) { 
+  mouseDown=true;
+}
+document.body.onmouseup = function() {
+  mouseDown=false;
+}
+
+function calculateAngle(X, Y,X1,Y1) {
+        const deltaX = X - X1+16;
+        const deltaY = Y - Y1+16;
+        const radians = Math.atan2(deltaY, deltaX);
+        return radians;
+    }
+
+c.addEventListener('mousemove', (event) => {
+        const mouseX = event.offsetX;
+        const mouseY = event.offsetY;
+
+        angle = calculateAngle(mouseX, mouseY,x+16,y+16);
+    });
+
+var at=60;
+var jt=120;
+function attack(){
+if(at==0){
+at=60;
+img.src='fard3.png';
+ens.forEach(cen);
+}
+}
+
+const ens=[];
+
+ens.push([100,100,0]);
+ens.push([150,150,2]);
+
+function draw(X,Y,ang,src){
+var dimg= new Image();
+dimg.src=src;
+ctx.save();
+ctx.translate(X+16,Y+16);
+ctx.rotate(ang);
+ctx.drawImage(dimg,-16,-16);
+ctx.restore();
+}
+
+function den(val,i,arr){
+draw(val[0],val[1],val[2],'en.png');
+}
+
+var et=100;
+
+function mcen(val,i,arr){
+val[2]=calculateAngle(val[0],val[1],x+16,y+16);
+if(Math.abs((x+16)-(val[0]+16))<20){
+if(Math.abs((val[1]+16)-(y+16))<20){
+while(arr.length>0)
+arr.pop();
+x=600;
+y=600;
+}}
+val[0]=val[0]+4*Math.cos(val[2]-Math.PI)*Math.random();
+val[1]=val[1]+4*Math.sin(val[2]-Math.PI)*Math.random();
+}
+
+function cen(val,i,arr){
+if(Math.abs(val[0]+16-(x+16+20*Math.cos(angle)))<40){
+if(Math.abs(val[1]+16-(y+16+20*Math.sin(angle)))<40){
+arr.splice(arr.indexOf(val),1);
+}}
+}
+
+function jump(){
+if(jt==0){
+jt=90;
+x=x+40*Math.cos(angle-Math.PI);
+y=y+40*Math.sin(angle-Math.PI);
+}
+}
+
+function game() {
+if(at<50)
+img.src='fard.png';
+if(sPressed == true)
+{y+=2;}
+if(wPressed == true)
+{y-=2;}
+if(dPressed == true)
+{x+=2;}
+if(aPressed == true)
+{x-=2;}
+if(qPressed == true)
+{jump();}
+if(at>0)
+at--;
+if(jt>0) 
+jt--;
+if(mouseDown==true)
+attack();
+
+if(et>0){et--;}
+else{
+ens.push([300*Math.cos(Math.random()*2*Math.PI)+x,
+300*Math.sin(Math.random()*2*Math.PI)+y,0]);
+et=100;
+}
+
+ctx.clearRect(0, 0, c.width, c.height);
+ctx.save();
+ctx.translate(x+16,y+16);
+ctx.rotate(angle);
+ctx.drawImage(img,-16,-16);
+ctx.restore();
+
+ens.forEach(den);
+ens.forEach(mcen);
+
+                }
+</script>
+
+
+
+
+</body>
+</html>
