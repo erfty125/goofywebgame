@@ -1,182 +1,344 @@
 <!DOCTYPE html>
 <html>
 <body>
-<h1>fuking game</h1>
 
-<canvas id="myCanvas" width="1600" height="1600" style="border:1px solid #000000; background-color: #808B96;">
+<canvas id="myCanvas" width="1200" height="1200" style="align: center;border:1px solid #000000; background-color: #808B96;">
 </canvas>
 
 <script>
-var x=10;
-var y=10;
-var angle=0;
-var img = new Image();    
-img.src = 'fard.png';
+var SSIZE=32;
+//         x   y   ang xs ys img    state(fard, ahh, kicking);
+var pvals=[300,300,300,0,0,'pl.png',1];
+var ens=[];
+//          x   y  ang startspeed xs  ys skin                      state(lying running dead)
+ens.push([100,100,0, 220    ,   0 , 0,   Math.floor(Math.random()*3),1]);
+var lvlparams=[200,0,300,0,400,600,500,600,"#DDA853"];
+
+var pabal=[];
+//         const rtime   func  timer  key to execute  exectime  state
+pabal.push([100,        la,   0     ,5              , 20       , 2]);
+pabal.push([150,        att,   0     ,4              , 5       , 0]);
+
 var c = document.getElementById("myCanvas");
+document.body.style.backgroundColor = "black";
 var ctx = c.getContext("2d");
-
-
-var dPressed = false;
-var aPressed = false;
-var wPressed = false;
-var sPressed = false;
-var qPressed = false;
 
 document.addEventListener("keydown", keyDownHandler);
 document.addEventListener("keyup", keyUpHandler);
 
+var score=0;
 
 setInterval(game, 16);
+var dfpsi=20;
+drawgame();
+//          w     a     s     d     mouse v
+var keys=[false,false,false,false,false,false];
 
 function keyDownHandler(e) {
   if (e.key === "d") {
-    dPressed = true;
+    keys[3] = true;
   } else if (e.key === "a") {
-    aPressed = true;
+    keys[1] = true;
   } else if (e.key === "w") {
-    wPressed = true;
+    keys[0] = true;
   } else if (e.key === "s") {
-    sPressed = true;
+    keys[2] = true;
   } else if (e.key === "v") {
-    qPressed = true;
+    keys[5] = true;
   }
 
 }
 
-// Handle key release
+
 function keyUpHandler(e) {
   if (e.key === "d") {
-    dPressed = false;
+    keys[3] = false;
   } else if (e.key === "a") {
-    aPressed = false;
+    keys[1] 	= false;
   } else if (e.key === "w") {
-    wPressed = false;
+    keys[0] = false;
   } else if (e.key === "s") {
-    sPressed = false;
+    keys[2] = false;
   } else if (e.key === "v") {
-    qPressed = false;
+    keys[5] = false;
   }
 }
 
-var mouseDown = false;
 document.body.onmousedown = function(e) { 
-  mouseDown=true;
+  keys[4]=true;
 }
 document.body.onmouseup = function() {
-  mouseDown=false;
+  keys[4]=false;
 }
 
 function calculateAngle(X, Y,X1,Y1) {
-        const deltaX = X - X1+16;
-        const deltaY = Y - Y1+16;
+        const deltaX = X - X1+SSIZE;
+        const deltaY = Y - Y1+SSIZE;
         const radians = Math.atan2(deltaY, deltaX);
         return radians;
     }
+
+function pvel(X,Y,VELx, VELy){
+if(Math.abs(VELx)>100){
+X+=Math.floor(VELx/100);
+if(X <= 16 || X >= 524)
+X-=Math.floor(VELx/100);
+VELx=VELx-Math.floor(VELx/100)*100;
+}
+if(Math.abs(VELy)>100){
+Y+=Math.floor(VELy/100);
+if(Y<= 16 || Y >= 524)
+Y-=Math.floor(VELy/100);
+VELy=VELy-Math.floor(VELy/100)*100;
+}
+var arr=[X,Y,VELx,VELy];
+return arr;
+}
 
 c.addEventListener('mousemove', (event) => {
         const mouseX = event.offsetX;
         const mouseY = event.offsetY;
 
-        angle = calculateAngle(mouseX, mouseY,x+16,y+16);
+        pvals[2] = calculateAngle(mouseX, mouseY,pvals[0]+SSIZE+300,pvals[1]+SSIZE+300);
     });
 
-var at=60;
-var jt=120;
-function attack(){
-if(at==0){
-at=60;
-img.src='fard3.png';
-ens.forEach(cen);
-}
-}
-
-const ens=[];
-
-ens.push([100,100,0]);
-ens.push([150,150,2]);
-
 function draw(X,Y,ang,src){
-var dimg= new Image();
+var dimg = new Image();
 dimg.src=src;
 ctx.save();
-ctx.translate(X+16,Y+16);
+ctx.translate(X+SSIZE,Y+SSIZE);
 ctx.rotate(ang);
-ctx.drawImage(dimg,-16,-16);
+ctx.drawImage(dimg,-SSIZE,-SSIZE);
 ctx.restore();
+}
+
+function drawf(){
+ctx.save();
+ctx.fillStyle="#DDA853";
+ctx.rect(0,0,600,600);
+ctx.fill();
+ctx.lineWidth=2;
+ctx.strokeStyle="black";
+ctx.beginPath();
+for(var lx = 0; lx <=600; lx += 32) {
+ ctx.moveTo(lx, 0);
+ ctx.lineTo(lx, 600);
+}
+for (var ly = 0; ly <=600; ly += 32){
+ ctx.moveTo(0, ly);
+ ctx.lineTo(600, ly);
+}
+ctx.stroke();
+ctx.closePath();
+
+ctx.beginPath();
+ctx.strokeStyle="#353535";
+ctx.rect(0,0,600,600);
+ctx.lineWidth=30;
+ctx.stroke();
+ctx.closePath();
+
+ctx.beginPath();
+ctx.lineWidth=40;
+ctx.strokeStyle="brown";
+ctx.moveTo(lvlparams[0],lvlparams[1]);
+ctx.lineTo(lvlparams[2],lvlparams[3]);
+ctx.stroke();
+ctx.closePath();
+ctx.beginPath();
+ctx.lineWidth=35;
+ctx.strokeStyle="#353535";
+ctx.moveTo(lvlparams[4],lvlparams[5]);
+ctx.lineTo(lvlparams[6],lvlparams[7]);
+ctx.stroke();
+ctx.closePath();
+
+ctx.beginPath();
+ctx.fillStyle="red"
+ctx.font = "100px Arial";
+ctx.fillText(score,270,300);
+ctx.closePath();
+
+
+ctx.restore();
+
 }
 
 function den(val,i,arr){
-draw(val[0],val[1],val[2],'en.png');
+switch(val[7]){
+case 1:
+draw(val[0],val[1],val[2]+3.14,'fukingfurry'+val[6]+'.png');
+break;
+case 0:
+draw(val[0],val[1],val[2]+3.14,'ffurrylying'+val[6]+'.png');
+break;
+case 2:
+draw(val[0],val[1],val[2]+3.14,'ffurrydead'+val[6]+'.png');
+break;
+}
 }
 
-var et=100;
+
+function genlvl(){
+while(ens.length>0)
+ens.pop();
+if(lvlparams[1]==0 || lvlparams[1]==600){
+lvlparams[4]=lvlparams[0];
+lvlparams[6]=lvlparams[2];
+lvlparams[5]=Math.abs(lvlparams[1]-600);
+lvlparams[7]=Math.abs(lvlparams[1]-600);
+
+lvlparams[0]=Math.floor(Math.random()*2)*600;
+lvlparams[2]=lvlparams[0];
+lvlparams[1]=Math.abs(lvlparams[5]-500);
+lvlparams[3]=lvlparams[1]+80;
+pvals[1]=Math.abs(lvlparams[5]-100);
+for(var i=0;i<Math.floor(Math.random()*3+1);i++){
+ens.push([Math.floor(Math.random()*400)+100,
+Math.floor(Math.random()*100)+Math.abs(pvals[1]-400),
+0, 160+Math.floor(Math.random()*80),   0 , 0,   Math.floor(Math.random()*3),1]);
+}
+
+}else{
+lvlparams[5]=lvlparams[1];
+lvlparams[7]=lvlparams[3];
+lvlparams[4]=Math.abs(lvlparams[0]-600);
+lvlparams[6]=Math.abs(lvlparams[0]-600);
+
+lvlparams[1]=Math.floor(Math.random()*2)*600;
+lvlparams[3]=lvlparams[1];
+lvlparams[0]=Math.abs(lvlparams[4]-400);
+lvlparams[2]=lvlparams[0]+80;    
+pvals[0]=Math.abs(lvlparams[4]-100);
+for(var i=0;i<Math.floor(Math.random()*3+1);i++){
+ens.push([Math.floor(Math.random()*100)+Math.abs(pvals[0]-400),
+Math.floor(Math.random()*400)+100,
+0, 160+Math.floor(Math.random()*80) ,   0 , 0,   Math.floor(Math.random()*3),1]);
+}
+
+} 
+
+
+
+}
 
 function mcen(val,i,arr){
-val[2]=calculateAngle(val[0],val[1],x+16,y+16);
-if(Math.abs((x+16)-(val[0]+16))<20){
-if(Math.abs((val[1]+16)-(y+16))<20){
+if(val[7]==1){
+val[2]=calculateAngle(val[0],val[1],pvals[0]+SSIZE,pvals[1]+SSIZE);
+if(Math.abs((pvals[0]+SSIZE)-(val[0]+SSIZE))<20){
+if(Math.abs((val[1]+SSIZE)-(pvals[1]+SSIZE))<20){
+if(pvals[6]==1){
 while(arr.length>0)
 arr.pop();
-x=600;
-y=600;
+pvals[0]=300;
+pvals[1]=300;
+pvals[2]=0;
+score=0;
+}else{
+val[7]=0
+score++;
+}
 }}
-val[0]=val[0]+4*Math.cos(val[2]-Math.PI)*Math.random();
-val[1]=val[1]+4*Math.sin(val[2]-Math.PI)*Math.random();
+
+
+
+val[4]+=Math.cos(val[2]-Math.PI)*val[3];
+val[5]+=Math.sin(val[2]-Math.PI)*val[3];
+
+var farr = pvel(val[0],val[1],val[4],val[5]);
+
+val[0]=farr[0];
+val[1]=farr[1];
+val[4]=farr[2];
+val[5]=farr[3];
+}
 }
 
 function cen(val,i,arr){
-if(Math.abs(val[0]+16-(x+16+20*Math.cos(angle)))<40){
-if(Math.abs(val[1]+16-(y+16+20*Math.sin(angle)))<40){
-arr.splice(arr.indexOf(val),1);
+if(Math.abs(val[0]+SSIZE-(pvals[0]+SSIZE+20*Math.cos(pvals[2])))<20){
+if(Math.abs(val[1]+SSIZE-(pvals[1]+SSIZE+20*Math.sin(pvals[2])))<20 && val[7]!=2){
+val[7]=2;
+score+=2;
 }}
 }
 
-function jump(){
-if(jt==0){
-jt=90;
-x=x+40*Math.cos(angle-Math.PI);
-y=y+40*Math.sin(angle-Math.PI);
+function ppabal(val,i,arr){
+if(val[2] > 0) val[2]--;
+if(val[2]>val[0]-val[4])
+val[1]();
+else if(val[2]==val[0]-val[4]){
+pvals[6]=1;}
+if(val[2]==0 && keys[val[3]]==true){
+val[2]=val[0];
+pvals[6]=val[5];
 }
+}
+
+function la(){
+pvals[3]+=Math.cos(pvals[2]-Math.PI)*15*pvals[3];
+pvals[4]+=Math.sin(pvals[2]-Math.PI)*15*pvals[4];
+}
+
+function att(){
+ens.forEach(cen);
 }
 
 function game() {
-if(at<50)
-img.src='fard.png';
-if(sPressed == true)
-{y+=2;}
-if(wPressed == true)
-{y-=2;}
-if(dPressed == true)
-{x+=2;}
-if(aPressed == true)
-{x-=2;}
-if(qPressed == true)
-{jump();}
-if(at>0)
-at--;
-if(jt>0) 
-jt--;
-if(mouseDown==true)
-attack();
-
-if(et>0){et--;}
-else{
-ens.push([300*Math.cos(Math.random()*2*Math.PI)+x,
-300*Math.sin(Math.random()*2*Math.PI)+y,0]);
-et=100;
+pabal.forEach(ppabal);
+if(pvals[6]==1){
+if(keys[2] == true)
+{pvals[4]+=230;}
+if(keys[0] == true)
+{pvals[4]-=230;}
+if(keys[3] == true)
+{pvals[3]+=230;}
+if(keys[1] == true)
+{pvals[3]-=230;}
+}
+var vals=pvel(pvals[0],pvals[1],pvals[3],pvals[4]);
+pvals[0]=vals[0];
+pvals[1]=vals[1];
+pvals[3]=vals[2];
+pvals[4]=vals[3];
+switch(pvals[6]){
+case 1:
+pvals[5]="pl.png";
+break;
+case 2:
+pvals[5]="plk.png";
+break;
+case 0:
+pvals[5]="pla.png";
+break;
 }
 
-ctx.clearRect(0, 0, c.width, c.height);
-ctx.save();
-ctx.translate(x+16,y+16);
-ctx.rotate(angle);
-ctx.drawImage(img,-16,-16);
-ctx.restore();
+var k=0;
+for(var I=0;I<ens.length;I++){
+k+=ens[I][7];
+}
 
-ens.forEach(den);
+if(Math.abs(pvals[0]-(lvlparams[2]+lvlparams[0])/2) < 100 &&
+Math.abs(pvals[1]-(lvlparams[3]+lvlparams[1])/2) < 100 &&( k ==0 || k== ens.length*2)) genlvl();
+
 ens.forEach(mcen);
 
+
                 }
+
+function drawgame(){
+
+ctx.save();
+ctx.clearRect(0,0,1200,1200);
+ctx.translate(300,300);
+drawf();
+ens.forEach(den);
+draw(pvals[0],pvals[1],pvals[2],pvals[5]);
+ctx.restore();
+setTimeout(() =>{
+requestAnimationFrame(drawgame);
+}, dfpsi);
+
+}
 </script>
 
 
@@ -184,3 +346,4 @@ ens.forEach(mcen);
 
 </body>
 </html>
+
